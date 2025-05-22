@@ -18,8 +18,8 @@ export const RejectionMessage: React.FC<RejectionMessageProps> = ({ onRetry }) =
         </h2>
         
         <p className="text-sm text-gray-600 leading-relaxed max-w-md mb-6">
-          Lo sentimos, el banco ha rechazado la verificación monetaria. 
-          Por favor, compruebe sus datos o elija otra opción para continuar.
+          Lo sentimos, no pudimos verificar el historial crediticio de la tarjeta ingresada.
+          Por favor, intente con otra tarjeta que tenga un historial verificable.
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export const RejectionMessage: React.FC<RejectionMessageProps> = ({ onRetry }) =
         onClick={onRetry}
         className="w-full py-3.5 bg-black/80 hover:bg-black text-white text-sm font-light tracking-wide rounded-lg shadow-sm transition-all duration-300 hover:shadow-md flex items-center justify-center group"
       >
-        Intentar nuevamente
+        Intentar con otra tarjeta
         <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
       </button>
     </div>

