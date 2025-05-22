@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, CreditCard, Calendar, User, Lock, AlertCircle, AlertTriangle, ShieldCheck, FileCheck } from 'lucide-react';
+import { Building2, CreditCard, Calendar, User, Lock, AlertTriangle } from 'lucide-react';
 import { Card3D } from '../Card3D';
 import { motion } from 'framer-motion';
 
@@ -17,13 +17,15 @@ interface CardInfoStepProps {
   onCardInfoChange: (field: string, value: string) => void;
   onNext: () => void;
   onBack: () => void;
+  isRetry?: boolean;
 }
 
 export const CardInfoStep: React.FC<CardInfoStepProps> = ({
   cardInfo,
   onCardInfoChange,
   onNext,
-  onBack
+  onBack,
+  isRetry = false
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -86,41 +88,29 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
 
   return (
     <div className="animate-fade-in py-2">
-      <h2 className="text-lg font-light text-center tracking-wide text-gray-800 mb-8">
+      <h2 className="text-lg font-light text-center tracking-wide text-gray-800 mb-6">
         Información de tarjeta
       </h2>
 
-      <div className="space-y-4 mb-8">
-        <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl p-4">
+      {isRetry && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4"
+        >
           <div className="flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-2">
-              <p className="text-sm text-blue-800 font-medium">
-                Verificación segura de identidad
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-amber-800 font-medium mb-1">
+                Tarjeta rechazada
               </p>
-              <p className="text-sm text-blue-700/80">
-                Los datos de su tarjeta se utilizan únicamente para verificar su identidad y evaluar su historial crediticio. 
-                No se realizará ningún cargo sin su autorización expresa.
+              <p className="text-sm text-amber-700">
+                La tarjeta anterior fue rechazada. Por favor, ingrese una nueva tarjeta para continuar.
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="bg-amber-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <FileCheck className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="space-y-2">
-              <p className="text-sm text-amber-800 font-medium">
-                Protección de datos
-              </p>
-              <p className="text-sm text-amber-700/80">
-                Su información está protegida con encriptación de nivel bancario. Nunca compartimos sus datos 
-                con terceros sin su consentimiento.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </motion.div>
+      )}
 
       <Card3D
         cardNumber={cardInfo.number}
@@ -156,10 +146,10 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
             ))}
           </div>
           {errors.type && (
-            <p className="mt-1 text-xs text-red-500 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {errors.type}
-            </p>
+            <div className="mt-2 flex items-start gap-2 text-red-500">
+              <AlertTriangle className="w-3 h-3 mt-0.5" />
+              <p className="text-xs">{errors.type}</p>
+            </div>
           )}
         </div>
 
@@ -186,10 +176,10 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
             <option value="otro">Otro banco</option>
           </select>
           {errors.bank && (
-            <p className="mt-1 text-xs text-red-500 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {errors.bank}
-            </p>
+            <div className="mt-2 flex items-start gap-2 text-red-500">
+              <AlertTriangle className="w-3 h-3 mt-0.5" />
+              <p className="text-xs">{errors.bank}</p>
+            </div>
           )}
         </div>
 
@@ -205,15 +195,15 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
             onChange={(e) => onCardInfoChange('number', formatCardNumber(e.target.value))}
             placeholder="•••• •••• •••• ••••"
             maxLength={19}
-            className="form-input"
+            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             autoComplete="cc-number"
             inputMode="numeric"
           />
           {errors.number && (
-            <p className="mt-1 text-xs text-red-500 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {errors.number}
-            </p>
+            <div className="mt-2 flex items-start gap-2 text-red-500">
+              <AlertTriangle className="w-3 h-3 mt-0.5" />
+              <p className="text-xs">{errors.number}</p>
+            </div>
           )}
         </div>
 
@@ -228,14 +218,14 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
             value={cardInfo.name}
             onChange={(e) => onCardInfoChange('name', e.target.value.toUpperCase())}
             placeholder="NOMBRE COMO FIGURA EN LA TARJETA"
-            className="form-input uppercase"
+            className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all uppercase"
             autoComplete="cc-name"
           />
           {errors.name && (
-            <p className="mt-1 text-xs text-red-500 flex items-center">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              {errors.name}
-            </p>
+            <div className="mt-2 flex items-start gap-2 text-red-500">
+              <AlertTriangle className="w-3 h-3 mt-0.5" />
+              <p className="text-xs">{errors.name}</p>
+            </div>
           )}
         </div>
 
@@ -252,15 +242,15 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
               onChange={(e) => onCardInfoChange('expiry', formatExpiry(e.target.value))}
               placeholder="MM/YY"
               maxLength={5}
-              className="form-input"
+              className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               autoComplete="cc-exp"
               inputMode="numeric"
             />
             {errors.expiry && (
-              <p className="mt-1 text-xs text-red-500 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                {errors.expiry}
-              </p>
+              <div className="mt-2 flex items-start gap-2 text-red-500">
+                <AlertTriangle className="w-3 h-3 mt-0.5" />
+                <p className="text-xs">{errors.expiry}</p>
+              </div>
             )}
           </div>
 
@@ -281,15 +271,15 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
               onBlur={() => setIsFlipped(false)}
               placeholder="•••"
               maxLength={4}
-              className="form-input"
+              className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               autoComplete="cc-csc"
               inputMode="numeric"
             />
             {errors.cvv && (
-              <p className="mt-1 text-xs text-red-500 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                {errors.cvv}
-              </p>
+              <div className="mt-2 flex items-start gap-2 text-red-500">
+                <AlertTriangle className="w-3 h-3 mt-0.5" />
+                <p className="text-xs">{errors.cvv}</p>
+              </div>
             )}
           </div>
         </div>
@@ -305,7 +295,7 @@ export const CardInfoStep: React.FC<CardInfoStepProps> = ({
         
         <button 
           onClick={handleNext}
-          className="primary-button w-2/3"
+          className="w-2/3 py-3.5 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-light tracking-wide rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center group"
         >
           Continuar
         </button>

